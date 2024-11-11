@@ -21,7 +21,7 @@ jobs:
           CREDENTIALS: ${{ secrets.WEBSITE }}
         run: |
           # 定義網站列表
-          SITES=("s8.com" "s9.com")
+          SITES=("infini-cloud.net")
 
           # 遍歷網站並進行自動登錄
           for SITE in "${SITES[@]}"; do
