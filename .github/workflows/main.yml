@@ -1,4 +1,4 @@
-          name: Infini Cloud Auto Login
+name: Infini Cloud Auto Login
 
 on:
   schedule:
