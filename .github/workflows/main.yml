@@ -13,29 +13,26 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Login to Infini Cloud
+      - name: Set up Infini Cloud Auto Login
         env:
-          CREDENTIALS: ${{ secrets.WEBSITE }}
+          CREDENTIALS: ${{ secrets.WEBSITE }}  # 從 Secrets 讀取帳號資訊
         run: |
-          # 設置需要登入的網站地址
-          SITE="infini-cloud.net"
-          
-          # 模擬多帳號登入，根據需要的邏輯選擇帳號
-          ACCOUNT="WEBSITE"  # 假設選擇第一個帳號
-          
-          # 根據選擇的帳號對應的 Secret
-          ACCOUNT_CREDENTIAL="${!ACCOUNT}"  # 解決選擇帳號的方式
+          # 將 CREDENTIALS 轉換為 JSON 格式
+          ACCOUNTS=$(echo $CREDENTIALS | jq .)
 
-          # 登入邏輯，這裡可以根據實際需要調整，假設是模擬登入
-          echo "Logging into ${SITE} with account: $ACCOUNT_CREDENTIAL"
+          # 遍歷每個帳號進行登入
+          for i in $(seq 0 $(($(echo $ACCOUNTS | jq length) - 1))); do
+            IP=$(echo $ACCOUNTS | jq -r ".[$i].ip")
+            USERNAME=$(echo $ACCOUNTS | jq -r ".[$i].username")
+            PASSWORD=$(echo $ACCOUNTS | jq -r ".[$i].password")
 
-          # 你可以根據網站的 API 或需求模擬登入
-          # 例如使用 curl 或其他方法提交登入請求
-          curl -X POST "https://infini-cloud.net/login" -d "username=${ACCOUNT_CREDENTIAL}" -d "password=your_password_here"
-          
-          # 這裡可以替換為其他方式的登入邏輯
-          echo "Successfully logged in with account $ACCOUNT"
+            echo "Logging into ${IP} with username: ${USERNAME}"
 
-          # 完成後的操作可以繼續
-          # 可以根據網站的 API 繼續進行後續操作
+            # 假設登入使用 curl 或其他 HTTP 請求
+            curl -X POST "https://${IP}/login" -d "username=${USERNAME}" -d "password=${PASSWORD}"
+
+            echo "Successfully logged in with account ${USERNAME} at ${IP}"
+
+            # 根據需要，可以繼續做其他操作，這裡是示範如何登錄
+          done
 
