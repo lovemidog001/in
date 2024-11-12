@@ -1,31 +1,36 @@
 name: serv00
-
 on:
   schedule:
-    - cron: '0 0 */5 * *'  # 每 5 天执行一次
-  workflow_dispatch:  # 支持手动执行  
+    - cron: '0 0 */3 * *'  # 每三天執行一次
+  workflow_dispatch:  # 允許手動觸發工作流
 
-env:
-  SSH_ACCOUNTS: ${{ secrets.SERV00 }}
-  TG_TOKEN: ${{ secrets.TG_TOKEN }}
-  CHAT_ID: ${{ secrets.CHAT_ID }}
-  
 jobs:
-  keep_serv00_login:
+  login-job:
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        
-      - name: Install jq
-        run: sudo apt-get install -y jq 
 
-      - name: Execute SSH Login Script
-        run: |
-          echo "$SSH_ACCOUNTS" > accounts.json
-          echo "accounts.json 内容："
-          chmod +x ./keep_serv00_login.sh 
-          ./keep_serv00_login.sh accounts.json "$TG_TOKEN" "$CHAT_ID"
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Infini Cloud Auto Login
         env:
-          PATH: /usr/bin:$PATH
+          CREDENTIALS: ${{ secrets.SERV00}}  # 從 Secrets 讀取帳號資訊
+        run: |
+          # 將 CREDENTIALS 轉換為 JSON 格式
+          ACCOUNTS=$(echo $CREDENTIALS | jq .)
+
+          # 遍歷每個帳號進行登入
+          for i in $(seq 0 $(($(echo $ACCOUNTS | jq length) - 1))); do
+            IP=$(echo $ACCOUNTS | jq -r ".[$i].ip")
+            USERNAME=$(echo $ACCOUNTS | jq -r ".[$i].username")
+            PASSWORD=$(echo $ACCOUNTS | jq -r ".[$i].password")
+
+            echo "Logging into ${IP} with username: ${USERNAME}"
+
+            # 假設登入使用 curl 或其他 HTTP 請求
+            curl -X POST "https://${IP}/login" -d "username=${USERNAME}" -d "password=${PASSWORD}"
+
+            echo "Successfully logged in with account ${USERNAME} at ${IP}"
+
+            # 根據需要，可以繼續做其他操作，這裡是示範如何登錄
+          done
