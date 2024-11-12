@@ -14,7 +14,7 @@ jobs:
 
       - name: Set up byet Auto Login
         env:
-          CREDENTIALS: ${{ secrets.byet}}  # 從 Secrets 讀取帳號資訊
+          CREDENTIALS: ${{ secrets.BYET}}  # 從 Secrets 讀取帳號資訊
         run: |
           # 將 CREDENTIALS 轉換為 JSON 格式
           ACCOUNTS=$(echo $CREDENTIALS | jq .)
