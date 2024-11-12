@@ -1,4 +1,4 @@
-name: keep_serv00_login
+name: serv00
 
 on:
   schedule:
